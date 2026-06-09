@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fgc-@+5rb9n)9z8$+9ger#y0vivt4hdw_^=cv%@cf3i6t@yb45'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+     'rest_framework'
+     'accounts',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bump_journey_db',
-        'USER': 'Maryjane',          # Your PostgreSQL username
+        
         'PASSWORD': '1103',  # Your PostgreSQL database password
         'HOST': 'localhost',
         'PORT': '5432',
