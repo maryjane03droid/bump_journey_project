@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView
+from .views import RegisterView, PatientProfileDetailView  # Added PatientProfileDetailView here
 
 urlpatterns = [
     # 1. Registration Endpoint
@@ -11,4 +11,7 @@ urlpatterns = [
     
     # 3. Token Refresh Endpoint
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # 4. Profile Endpoint
+    path('profile/', PatientProfileDetailView.as_view(), name='patient_profile'),
 ]
