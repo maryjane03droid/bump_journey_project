@@ -1,41 +1,39 @@
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
-from .serializers import RegisterSerializer
-from rest_framework.permissions import IsAuthenticated
 from .models import PatientProfile
-from .serializers import PatientProfileSerializer
+from .serializers import RegisterSerializer, PatientProfileSerializer
 
 User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    permission_classes = [AllowAny]  # Anyone should be able to sign up
+    permission_classes = [AllowAny]  # Anyone can sign up
     serializer_class = RegisterSerializer
 
-
-class PatientProfileDetailView(generics.RetrieveUpdateAPIView):
-    serializer_class = PatientProfileSerializer
-    permission_classes = [IsAuthenticated] # Guarded by JWT
-
-    def get_object(self):
-        # Automatically fetches the profile matching the logged-in user token
-        profile, created = PatientProfile.objects.get_or_create(user=self.request.user)
-        return profile
-    
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_available = True
         if serializer.is_valid():
             user = serializer.save()
             return Response({
                 "message": "User registered successfully",
                 "user": {
+                    "id": user.id,
                     "username": user.username,
                     "email": user.email,
                     "role": user.role
                 }
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PatientProfileDetailView(generics.RetrieveUpdateAPIView):
+    serializer_class = PatientProfileSerializer
+    permission_classes = [IsAuthenticated] # Guarded securely by JWT
+
+    def get_object(self):
+        # Automatically fetches or builds the profile matching the logged-in token user
+        profile, created = PatientProfile.objects.get_or_create(user=self.request.user)
+        return profile
