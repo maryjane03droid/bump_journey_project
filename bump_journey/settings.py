@@ -125,7 +125,7 @@ REST_FRAMEWORK = {
     )
 }
 
-# 🟢 CORS Settings: Allows your local React frontend to communicate securely with Django
+# Allows local React frontend to communicate securely with Django
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
