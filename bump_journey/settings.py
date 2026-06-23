@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'tracker',
     'django_filters'
 ]
+# Allows React (or any frontend) to make requests to this API
+CORS_ALLOW_ALL_ORIGINS = True
+
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  #  intercept frontend requests early
@@ -102,7 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -115,7 +119,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}
 # Tell Django to use our custom UUID user model
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -125,9 +128,4 @@ REST_FRAMEWORK = {
     )
 }
 
-# Allows local React frontend to communicate securely with Django
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-ALLOWED_HOSTS = ['.onrender.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']

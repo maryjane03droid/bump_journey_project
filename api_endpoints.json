@@ -1,0 +1,112 @@
+{
+  "base_path": "/api/",
+  "endpoints": [
+    {
+      "path": "/api/auth/register/",
+      "methods": ["POST"],
+      "access": "public",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "username": "string",
+        "email": "string",
+        "password": "string",
+        "role": "string (PATIENT|STAFF|ADMIN)"
+      },
+      "response_body": {
+        "message": "string",
+        "user": {
+          "id": "uuid",
+          "username": "string",
+          "email": "string",
+          "role": "string"
+        }
+      }
+    },
+    {
+      "path": "/api/auth/login/",
+      "methods": ["POST"],
+      "access": "public",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "username": "string",
+        "password": "string"
+      },
+      "response_body": {
+        "access": "string",
+        "refresh": "string"
+      }
+    },
+    {
+      "path": "/api/auth/token/refresh/",
+      "methods": ["POST"],
+      "access": "public",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "refresh": "string"
+      },
+      "response_body": {
+        "access": "string"
+      }
+    },
+    {
+      "path": "/api/auth/profile/",
+      "methods": ["GET", "PUT", "PATCH"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "PUT": {
+          "estimated_due_date": "date",
+          "current_week": "integer",
+          "emergency_contact_name": "string",
+          "emergency_contact_phone": "string"
+        },
+        "PATCH": {
+          "estimated_due_date": "date (optional)",
+          "current_week": "integer (optional)",
+          "emergency_contact_name": "string (optional)",
+          "emergency_contact_phone": "string (optional)"
+        }
+      },
+      "response_body": {
+        "id": "uuid",
+        "username": "string",
+        "email": "string",
+        "estimated_due_date": "date",
+        "current_week": "integer",
+        "emergency_contact_name": "string",
+        "emergency_contact_phone": "string"
+      }
+    },
+    {
+      "path": "/api/tracker/symptoms/",
+      "methods": ["GET", "POST"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "POST": {
+          "symptom_name": "string",
+          "severity": "string (MILD|MODERATE|SEVERE)",
+          "notes": "string (optional)"
+        }
+      },
+      "response_body": {
+        "GET": [
+          {
+            "id": "integer",
+            "symptom_name": "string",
+            "severity": "string",
+            "notes": "string",
+            "logged_at": "datetime"
+          }
+        ],
+        "POST": {
+          "id": "integer",
+          "symptom_name": "string",
+          "severity": "string",
+          "notes": "string",
+          "logged_at": "datetime"
+        }
+      }
+    }
+  ]
+}
