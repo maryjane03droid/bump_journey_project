@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'corsheaders',  
     'accounts',
     'tracker',
-    'django_filters'
+    'django_filters',
+    'staff',
 ]
 # Allows React (or any frontend) to make requests to this API
 CORS_ALLOW_ALL_ORIGINS = True

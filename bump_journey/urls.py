@@ -2,10 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    # Standard, clean admin path without loops
     path('admin/', admin.site.urls),
-    
-    # App routers
-    path('api/auth/', include('accounts.urls')),
+    path('api/accounts/', include('accounts.urls')),
     path('api/tracker/', include('tracker.urls')),
+    path('api/staff/', include('staff.urls')),  # <-- Delegates routing to the staff app
 ]
