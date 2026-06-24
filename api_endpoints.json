@@ -2,7 +2,7 @@
   "base_path": "/api/",
   "endpoints": [
     {
-      "path": "/api/auth/register/",
+      "path": "/api/accounts/register/",
       "methods": ["POST"],
       "access": "public",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
@@ -23,7 +23,7 @@
       }
     },
     {
-      "path": "/api/auth/login/",
+      "path": "/api/accounts/login/",
       "methods": ["POST"],
       "access": "public",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
@@ -37,7 +37,7 @@
       }
     },
     {
-      "path": "/api/auth/token/refresh/",
+      "path": "/api/accounts/token/refresh/",
       "methods": ["POST"],
       "access": "public",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
@@ -49,7 +49,7 @@
       }
     },
     {
-      "path": "/api/auth/profile/",
+      "path": "/api/accounts/profile/",
       "methods": ["GET", "PUT", "PATCH"],
       "access": "authenticated",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
@@ -78,34 +78,195 @@
       }
     },
     {
-      "path": "/api/tracker/symptoms/",
+      "path": "/api/tracker/pregnancy-profiles/",
       "methods": ["GET", "POST"],
       "access": "authenticated",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
       "request_body": {
         "POST": {
-          "symptom_name": "string",
-          "severity": "string (MILD|MODERATE|SEVERE)",
-          "notes": "string (optional)"
+          "patient": "uuid (required for STAFF|ADMIN, omitted for PATIENT)",
+          "last_menstrual_period_date": "date",
+          "blood_group": "string",
+          "medical_history_notes": "string (optional)"
         }
       },
       "response_body": {
         "GET": [
           {
             "id": "integer",
-            "symptom_name": "string",
-            "severity": "string",
-            "notes": "string",
-            "logged_at": "datetime"
+            "patient": "uuid",
+            "patient_username": "string",
+            "last_menstrual_period_date": "date",
+            "estimated_due_date": "date",
+            "blood_group": "string",
+            "medical_history_notes": "string"
           }
         ],
         "POST": {
           "id": "integer",
-          "symptom_name": "string",
-          "severity": "string",
-          "notes": "string",
-          "logged_at": "datetime"
+          "patient": "uuid",
+          "patient_username": "string",
+          "last_menstrual_period_date": "date",
+          "estimated_due_date": "date",
+          "blood_group": "string",
+          "medical_history_notes": "string"
         }
+      }
+    },
+    {
+      "path": "/api/tracker/pregnancy-profiles/{id}/",
+      "methods": ["GET", "PUT", "PATCH", "DELETE"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "PUT": {
+          "patient": "uuid",
+          "last_menstrual_period_date": "date",
+          "blood_group": "string",
+          "medical_history_notes": "string (optional)"
+        },
+        "PATCH": {
+          "patient": "uuid (optional)",
+          "last_menstrual_period_date": "date (optional)",
+          "blood_group": "string (optional)",
+          "medical_history_notes": "string (optional)"
+        }
+      },
+      "response_body": {
+        "id": "integer",
+        "patient": "uuid",
+        "patient_username": "string",
+        "last_menstrual_period_date": "date",
+        "estimated_due_date": "date",
+        "blood_group": "string",
+        "medical_history_notes": "string"
+      }
+    },
+    {
+      "path": "/api/tracker/health-logs/",
+      "methods": ["GET", "POST"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "POST": {
+          "patient": "uuid (required for STAFF|ADMIN, omitted for PATIENT)",
+          "weight_kg": "number",
+          "blood_pressure": "string",
+          "fetal_kick_count": "integer (optional)",
+          "symptoms": "string (optional)"
+        }
+      },
+      "response_body": {
+        "GET": [
+          {
+            "id": "integer",
+            "patient": "uuid",
+            "patient_username": "string",
+            "recorded_at": "datetime",
+            "weight_kg": "number",
+            "blood_pressure": "string",
+            "fetal_kick_count": "integer",
+            "symptoms": "string"
+          }
+        ],
+        "POST": {
+          "id": "integer",
+          "patient": "uuid",
+          "patient_username": "string",
+          "recorded_at": "datetime",
+          "weight_kg": "number",
+          "blood_pressure": "string",
+          "fetal_kick_count": "integer",
+          "symptoms": "string"
+        }
+      }
+    },
+    {
+      "path": "/api/tracker/health-logs/{id}/",
+      "methods": ["GET", "PUT", "PATCH", "DELETE"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "PUT": {
+          "patient": "uuid",
+          "weight_kg": "number",
+          "blood_pressure": "string",
+          "fetal_kick_count": "integer (optional)",
+          "symptoms": "string (optional)"
+        },
+        "PATCH": {
+          "patient": "uuid (optional)",
+          "weight_kg": "number (optional)",
+          "blood_pressure": "string (optional)",
+          "fetal_kick_count": "integer (optional)",
+          "symptoms": "string (optional)"
+        }
+      },
+      "response_body": {
+        "id": "integer",
+        "patient": "uuid",
+        "patient_username": "string",
+        "recorded_at": "datetime",
+        "weight_kg": "number",
+        "blood_pressure": "string",
+        "fetal_kick_count": "integer",
+        "symptoms": "string"
+      }
+    },
+    {
+      "path": "/api/staff/notes/",
+      "methods": ["GET", "POST"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "POST": {
+          "appointment": "integer",
+          "notes": "string",
+          "prescriptions": "string (optional)"
+        }
+      },
+      "response_body": {
+        "GET": [
+          {
+            "id": "integer",
+            "appointment": "integer",
+            "notes": "string",
+            "prescriptions": "string",
+            "created_at": "datetime"
+          }
+        ],
+        "POST": {
+          "id": "integer",
+          "appointment": "integer",
+          "notes": "string",
+          "prescriptions": "string",
+          "created_at": "datetime"
+        }
+      }
+    },
+    {
+      "path": "/api/staff/notes/{id}/",
+      "methods": ["GET", "PUT", "PATCH", "DELETE"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "PUT": {
+          "appointment": "integer",
+          "notes": "string",
+          "prescriptions": "string (optional)"
+        },
+        "PATCH": {
+          "appointment": "integer (optional)",
+          "notes": "string (optional)",
+          "prescriptions": "string (optional)"
+        }
+      },
+      "response_body": {
+        "id": "integer",
+        "appointment": "integer",
+        "notes": "string",
+        "prescriptions": "string",
+        "created_at": "datetime"
       }
     }
   ]

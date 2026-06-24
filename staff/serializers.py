@@ -1,17 +1,19 @@
 from rest_framework import serializers
-from .models import Appointment, ClinicalNote
+from .models import Appointment, StaffNote
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    patient_username = serializers.ReadOnlyField(source='patient.username')
-    doctor_username = serializers.ReadOnlyField(source='doctor.username')
-
     class Meta:
         model = Appointment
-        fields = ['id', 'patient', 'patient_username', 'doctor', 'doctor_username', 'appointment_date', 'status', 'reason_for_visit']
-        read_only_fields = ['id']
+        fields = ['id', 'patient', 'date', 'time', 'reason', 'status', 'created_at']
 
-class ClinicalNoteSerializer(serializers.ModelSerializer):
+class StaffNoteSerializer(serializers.ModelSerializer):
+    # This allows Postman to send notes with OR without an appointment ID
+    appointment = serializers.PrimaryKeyRelatedField(
+        required=False, 
+        allow_null=True, 
+        queryset=Appointment.objects.all()
+    )
+
     class Meta:
-        model = ClinicalNote
-        fields = ['id', 'appointment', 'notes', 'prescriptions', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        model = StaffNote
+        fields = ['id', 'patient', 'appointment', 'notes', 'prescriptions', 'created_at']
