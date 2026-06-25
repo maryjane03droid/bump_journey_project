@@ -1,39 +1,47 @@
-from django.shortcuts import render
-from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import status, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from .models import PatientProfile
-from .serializers import RegisterSerializer, PatientProfileSerializer
+from .serializers import UserSerializer
 
 User = get_user_model()
 
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = [AllowAny]  # Anyone can sign up
-    serializer_class = RegisterSerializer
-
-    def create(self, request, *args, **kwargs):
+# Custom JWT Login to enforce Admin approval for Staff/Admin roles
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({
-                "message": "User registered successfully",
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "role": user.role
-                }
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        user = User.objects.get(username=request.data.get('username'))
+        
+        if not user.is_approved:
+            return Response(
+                {"detail": "Your staff account is pending Admin approval."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
+# Admin-only view to approve pending accounts
+class ApproveStaffView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-class PatientProfileDetailView(generics.RetrieveUpdateAPIView):
-    serializer_class = PatientProfileSerializer
-    permission_classes = [IsAuthenticated] # Guarded securely by JWT
-
-    def get_object(self):
-        # Automatically fetches or builds the profile matching the logged-in token user
-        profile, created = PatientProfile.objects.get_or_create(user=self.request.user)
-        return profile
+    def patch(self, request, pk):
+        # Enforce that only users with the ADMIN role can access this endpoint
+        if request.user.role != 'ADMIN':
+            return Response({"detail": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            user_to_approve = User.objects.get(pk=pk)
+            user_to_approve.is_approved = True
+            user_to_approve.save()
+            return Response(
+                {"detail": f"User {user_to_approve.username} has been successfully approved."}, 
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)

@@ -1,20 +1,9 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, PatientProfileDetailView  # Added PatientProfileDetailView here
-
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import CustomTokenObtainPairView, ApproveStaffView
 
 urlpatterns = [
-    # 1. Registration Endpoint
-    path('register/', RegisterView.as_view(), name='auth_register'),
-    
-    # 2. Login Endpoint (Returns access and refresh tokens automatically)
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    
-    # 3. Token Refresh Endpoint
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    # 4. Profile Endpoint
-    path('profile/', PatientProfileDetailView.as_view(), name='patient_profile'),
-
-    
+    path('accounts/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('accounts/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('accounts/users/<int:pk>/approve/', ApproveStaffView.as_view(), name='approve_staff'),
 ]
