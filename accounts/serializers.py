@@ -1,33 +1,38 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Profile
+from .models import PatientProfile
 
 User = get_user_model()
 
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['full_name', 'due_date', 'bio']
-
-class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)
+# 1. REGISTER SERIALIZER (Base margin)
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email', 'role', 'is_approved', 'date_joined', 'profile']
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'is_approved': {'read_only': True}
-        }
+        fields = ['id', 'username', 'email', 'password', 'role']
 
     def create(self, validated_data):
-        role = validated_data.get('role', 'PATIENT')
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            email=validated_data.get('email', ''),
-            role=role
-        )
-        # Instantiate a corresponding empty profile immediately
-        Profile.objects.create(user=user)
+        password = validated_data.pop('password')
+        user = User.objects.create(**validated_data)
+        user.set_password(password)  # Hashes the password securely
+        user.save()
         return user
+
+
+# 2. PATIENT PROFILE SERIALIZER (Moved to base margin)
+class PatientProfileSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.username')
+    email = serializers.ReadOnlyField(source='user.email')
+
+    class Meta:
+        model = PatientProfile
+        fields = [
+            'id', 
+            'username', 
+            'email', 
+            'estimated_due_date', 
+            'current_week', 
+            'emergency_contact_name', 
+            'emergency_contact_phone'
+        ]

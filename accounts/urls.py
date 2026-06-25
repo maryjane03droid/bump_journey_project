@@ -1,16 +1,20 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import (
-    CustomTokenObtainPairView, AdminUserManagementView, AdminUserDetailView,
-    StaffPatientSearchView, PatientHistoryView, ProfileView
-)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import RegisterView, PatientProfileDetailView  # Added PatientProfileDetailView here
+
 
 urlpatterns = [
-    path('accounts/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('accounts/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('accounts/users/', AdminUserManagementView.as_view(), name='admin_users'),
-    path('accounts/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin_user_detail'),
-    path('accounts/patients/', StaffPatientSearchView.as_view(), name='staff_patients'),
-    path('accounts/patients/<int:pk>/history/', PatientHistoryView.as_view(), name='patient_history'),
-    path('accounts/profile/', ProfileView.as_view(), name='user_profile'),
+    # 1. Registration Endpoint
+    path('register/', RegisterView.as_view(), name='auth_register'),
+    
+    # 2. Login Endpoint (Returns access and refresh tokens automatically)
+    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
+    # 3. Token Refresh Endpoint
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # 4. Profile Endpoint
+    path('profile/', PatientProfileDetailView.as_view(), name='patient_profile'),
+
+    
 ]
