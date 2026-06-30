@@ -214,13 +214,82 @@
       }
     },
     {
+      "path": "/api/staff/appointments/",
+      "methods": ["GET", "POST"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "POST": {
+          "patient": "uuid",
+          "date": "date",
+          "time": "time",
+          "reason": "string (optional)",
+          "status": "string (SCHEDULED|COMPLETED|CANCELLED, optional)"
+        }
+      },
+      "response_body": {
+        "GET": [
+          {
+            "id": "integer",
+            "patient": "uuid",
+            "date": "date",
+            "time": "time",
+            "reason": "string",
+            "status": "string",
+            "created_at": "datetime"
+          }
+        ],
+        "POST": {
+          "id": "integer",
+          "patient": "uuid",
+          "date": "date",
+          "time": "time",
+          "reason": "string",
+          "status": "string",
+          "created_at": "datetime"
+        }
+      }
+    },
+    {
+      "path": "/api/staff/appointments/{id}/",
+      "methods": ["GET", "PUT", "PATCH", "DELETE"],
+      "access": "authenticated",
+      "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
+      "request_body": {
+        "PUT": {
+          "patient": "uuid",
+          "date": "date",
+          "time": "time",
+          "reason": "string (optional)",
+          "status": "string (SCHEDULED|COMPLETED|CANCELLED, optional)"
+        },
+        "PATCH": {
+          "patient": "uuid (optional)",
+          "date": "date (optional)",
+          "time": "time (optional)",
+          "reason": "string (optional)",
+          "status": "string (optional)"
+        }
+      },
+      "response_body": {
+        "id": "integer",
+        "patient": "uuid",
+        "date": "date",
+        "time": "time",
+        "reason": "string",
+        "status": "string",
+        "created_at": "datetime"
+      }
+    },
+    {
       "path": "/api/staff/notes/",
       "methods": ["GET", "POST"],
       "access": "authenticated",
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
       "request_body": {
         "POST": {
-          "appointment": "integer",
+          "patient": "uuid",
+          "appointment": "integer (optional)",
           "notes": "string",
           "prescriptions": "string (optional)"
         }
@@ -229,6 +298,7 @@
         "GET": [
           {
             "id": "integer",
+            "patient": "uuid",
             "appointment": "integer",
             "notes": "string",
             "prescriptions": "string",
@@ -237,6 +307,7 @@
         ],
         "POST": {
           "id": "integer",
+          "patient": "uuid",
           "appointment": "integer",
           "notes": "string",
           "prescriptions": "string",
@@ -251,11 +322,13 @@
       "allowed_roles": ["PATIENT", "STAFF", "ADMIN"],
       "request_body": {
         "PUT": {
-          "appointment": "integer",
+          "patient": "uuid",
+          "appointment": "integer (optional)",
           "notes": "string",
           "prescriptions": "string (optional)"
         },
         "PATCH": {
+          "patient": "uuid (optional)",
           "appointment": "integer (optional)",
           "notes": "string (optional)",
           "prescriptions": "string (optional)"
@@ -263,6 +336,7 @@
       },
       "response_body": {
         "id": "integer",
+        "patient": "uuid",
         "appointment": "integer",
         "notes": "string",
         "prescriptions": "string",

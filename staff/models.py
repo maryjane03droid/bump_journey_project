@@ -11,6 +11,15 @@ class Appointment(models.Model):
     ]
 
     patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
+    
+    # FIXED: Added null=True to safely handle existing data migrations with UUIDs
+    doctor = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='scheduled_appointments', 
+        null=True
+    )
+    
     date = models.DateField()
     time = models.TimeField()
     reason = models.CharField(max_length=255, blank=True, null=True)
@@ -21,7 +30,8 @@ class Appointment(models.Model):
         ordering = ['-date', '-time']
 
     def __str__(self):
-        return f"{self.patient.username} - {self.date} at {self.time}"
+        doctor_name = self.doctor.username if self.doctor else "No Doctor Assigned"
+        return f"{self.patient.username} - {self.date} at {self.time} with Dr. {doctor_name}"
 
 
 class StaffNote(models.Model):
@@ -32,9 +42,17 @@ class StaffNote(models.Model):
         related_name="staff_notes"
     )
     
+    # FIXED: Added null=True to safely handle existing data migrations with UUIDs
+    author = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name="authored_notes", 
+        null=True
+    )
+    
     # Decoupled relationship: optional field allowing null database values
     appointment = models.ForeignKey(
-        'Appointment',  # This now perfectly links to the class above!
+        'Appointment',  
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,
@@ -49,4 +67,5 @@ class StaffNote(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Note for {self.patient.username} on {self.created_at.strftime('%Y-%m-%d')}"
+        author_name = self.author.username if self.author else "Unknown Author"
+        return f"Note for {self.patient.username} by {author_name} on {self.created_at.strftime('%Y-%m-%d')}"
