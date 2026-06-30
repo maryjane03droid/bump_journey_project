@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, exceptions
+# In your views.py
+from rest_framework import viewsets, permissions
 from .models import PregnancyProfile, HealthLog
 from .serializers import PregnancyProfileSerializer, HealthLogSerializer
 
@@ -8,19 +9,9 @@ class PregnancyProfileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['STAFF', 'ADMIN']:
-            return PregnancyProfile.objects.all().select_related('patient')
+        if user.is_staff or user.is_superuser:
+            return PregnancyProfile.objects.all()
         return PregnancyProfile.objects.filter(patient=user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        if user.role in ['STAFF', 'ADMIN']:
-            if 'patient' not in self.request.data:
-                raise exceptions.ValidationError({"patient": "Medical staff must explicitly provide a patient ID."})
-            serializer.save()
-        else:
-            serializer.save(patient=user)
-
 
 class HealthLogViewSet(viewsets.ModelViewSet):
     serializer_class = HealthLogSerializer
@@ -28,15 +19,12 @@ class HealthLogViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['STAFF', 'ADMIN']:
-            return HealthLog.objects.all().select_related('patient')
-        return HealthLog.objects.filter(patient=user)
+        # Doctors see all logs (so they can monitor the dashboard)
+        if user.is_staff or user.is_superuser:
+            return HealthLog.objects.all().order_by('-recorded_at')
+        # Patients only see their own daily logs
+        return HealthLog.objects.filter(patient=user).order_by('-recorded_at')
 
     def perform_create(self, serializer):
-        user = self.request.user
-        if user.role in ['STAFF', 'ADMIN']:
-            if 'patient' not in self.request.data:
-                raise exceptions.ValidationError({"patient": "Medical staff must explicitly provide a patient ID."})
-            serializer.save()
-        else:
-            serializer.save(patient=user)
+        # Automatically attach the logged-in patient when they submit a daily log
+        serializer.save(patient=self.request.user)

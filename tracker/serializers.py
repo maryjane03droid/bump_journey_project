@@ -14,5 +14,6 @@ class HealthLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HealthLog
-        fields = ['id', 'patient', 'patient_username', 'recorded_at', 'weight_kg', 'blood_pressure', 'fetal_kick_count', 'symptoms']
+        # ADDED: 'urgent_attention_requested' to the fields list
+        fields = ['id', 'patient', 'patient_username', 'recorded_at', 'weight_kg', 'blood_pressure', 'fetal_kick_count', 'symptoms', 'urgent_attention_requested']
         read_only_fields = ['id', 'recorded_at']

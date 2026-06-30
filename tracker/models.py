@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.conf import settings
 from datetime import timedelta
@@ -27,6 +26,9 @@ class HealthLog(models.Model):
     blood_pressure = models.CharField(max_length=20, help_text="Format: 120/80")
     fetal_kick_count = models.IntegerField(blank=True, null=True)
     symptoms = models.TextField(blank=True, null=True)
+    
+    # NEW: Allows the patient to flag a daily log as urgent for the doctor's dashboard
+    urgent_attention_requested = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-recorded_at']
