@@ -8,16 +8,18 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
 
-    # You need this to auto-assign the doctor!
     def perform_create(self, serializer):
-        serializer.save(doctor=self.request.user)
-
+        user = self.request.user
+        if user.role == 'PATIENT':
+            serializer.save(patient=user)
+        else:
+            patient_id = self.request.data.get('patient')
+            serializer.save(doctor=user, patient_id=patient_id)
 
 class StaffNoteViewSet(viewsets.ModelViewSet):
     queryset = StaffNote.objects.all()
     serializer_class = StaffNoteSerializer
     permission_classes = [IsAuthenticated]
 
-    # You need this to auto-assign the author!
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

@@ -5,27 +5,13 @@ from .models import Appointment, StaffNote
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Sends user profile data and explicit system roles back to React
-    """
-    role = serializers.SerializerMethodField()
-
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role']
-
-    def get_role(self, obj):
-        if obj.is_superuser:
-            return 'admin'
-        if obj.is_staff:
-            return 'doctor'  # Can be expanded to 'midwife' if using a custom field
-        return 'patient'
-
+        fields = ['id', 'username', 'email', 'role'] 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    # Sends readable strings to React instead of just ID numbers
     doctor_username = serializers.ReadOnlyField(source='doctor.username')
-    patient_username = serializers.ReadOnlyField(source='patient.username')  # ADDED for Frontend dashboards
+    patient_username = serializers.ReadOnlyField(source='patient.username') 
 
     class Meta:
         model = Appointment
@@ -34,13 +20,13 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'doctor_username', 'date', 'time', 'reason', 'status', 'created_at'
         ]
         extra_kwargs = {
-            'doctor': {'read_only': True}  # Populated via the view, not the JSON payload
+            'doctor': {'read_only': True},
+            'patient': {'read_only': True} 
         }
-
 
 class StaffNoteSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
-    patient_username = serializers.ReadOnlyField(source='patient.username')  # ADDED for Frontend dashboards
+    patient_username = serializers.ReadOnlyField(source='patient.username') 
     appointment = serializers.PrimaryKeyRelatedField(
         required=False, 
         allow_null=True, 
@@ -54,5 +40,5 @@ class StaffNoteSerializer(serializers.ModelSerializer):
             'author_username', 'appointment', 'notes', 'prescriptions', 'created_at'
         ]
         extra_kwargs = {
-            'author': {'read_only': True}  # Populated via the view, not the JSON payload
+            'author': {'read_only': True} 
         }

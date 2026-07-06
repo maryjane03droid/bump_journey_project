@@ -10,16 +10,13 @@
         "username": "string",
         "email": "string",
         "password": "string",
-        "role": "string (PATIENT|STAFF|ADMIN)"
+        "role": "string (PATIENT|STAFF|ADMIN, optional)"
       },
       "response_body": {
-        "message": "string",
-        "user": {
-          "id": "uuid",
-          "username": "string",
-          "email": "string",
-          "role": "string"
-        }
+        "id": "uuid",
+        "username": "string",
+        "email": "string",
+        "role": "string"
       }
     },
     {
@@ -33,7 +30,9 @@
       },
       "response_body": {
         "access": "string",
-        "refresh": "string"
+        "refresh": "string",
+        "username": "string",
+        "role": "string"
       }
     },
     {
@@ -166,7 +165,8 @@
             "weight_kg": "number",
             "blood_pressure": "string",
             "fetal_kick_count": "integer",
-            "symptoms": "string"
+            "symptoms": "string",
+            "urgent_attention_requested": "boolean"
           }
         ],
         "POST": {
@@ -177,7 +177,8 @@
           "weight_kg": "number",
           "blood_pressure": "string",
           "fetal_kick_count": "integer",
-          "symptoms": "string"
+          "symptoms": "string",
+          "urgent_attention_requested": "boolean"
         }
       }
     },
@@ -210,7 +211,8 @@
         "weight_kg": "number",
         "blood_pressure": "string",
         "fetal_kick_count": "integer",
-        "symptoms": "string"
+        "symptoms": "string",
+        "urgent_attention_requested": "boolean"
       }
     },
     {
@@ -232,6 +234,9 @@
           {
             "id": "integer",
             "patient": "uuid",
+            "patient_username": "string",
+            "doctor": "uuid",
+            "doctor_username": "string",
             "date": "date",
             "time": "time",
             "reason": "string",
@@ -242,6 +247,9 @@
         "POST": {
           "id": "integer",
           "patient": "uuid",
+          "patient_username": "string",
+          "doctor": "uuid",
+          "doctor_username": "string",
           "date": "date",
           "time": "time",
           "reason": "string",
@@ -274,6 +282,9 @@
       "response_body": {
         "id": "integer",
         "patient": "uuid",
+        "patient_username": "string",
+        "doctor": "uuid",
+        "doctor_username": "string",
         "date": "date",
         "time": "time",
         "reason": "string",
@@ -299,6 +310,9 @@
           {
             "id": "integer",
             "patient": "uuid",
+            "patient_username": "string",
+            "author": "uuid",
+            "author_username": "string",
             "appointment": "integer",
             "notes": "string",
             "prescriptions": "string",
@@ -308,6 +322,9 @@
         "POST": {
           "id": "integer",
           "patient": "uuid",
+          "patient_username": "string",
+          "author": "uuid",
+          "author_username": "string",
           "appointment": "integer",
           "notes": "string",
           "prescriptions": "string",
@@ -337,6 +354,9 @@
       "response_body": {
         "id": "integer",
         "patient": "uuid",
+        "patient_username": "string",
+        "author": "uuid",
+        "author_username": "string",
         "appointment": "integer",
         "notes": "string",
         "prescriptions": "string",
