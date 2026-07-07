@@ -4,24 +4,27 @@ from .models import Appointment, StaffNote
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role'] 
+        fields = ['id', 'username', 'email', 'role']
+
 
 class AppointmentSerializer(serializers.ModelSerializer):
     doctor_username = serializers.ReadOnlyField(source='doctor.username')
-    patient_username = serializers.ReadOnlyField(source='patient.username') 
+    patient_username = serializers.ReadOnlyField(source='patient.username')
+    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    doctor = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'patient', 'patient_username', 'doctor', 
+            'id', 'patient', 'patient_username', 'doctor',
             'doctor_username', 'date', 'time', 'reason', 'status', 'created_at'
         ]
         extra_kwargs = {
             'doctor': {'read_only': True},
-            'patient': {'read_only': True} 
         }
 
 class StaffNoteSerializer(serializers.ModelSerializer):
