@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import PregnancyProfile, HealthLog
 
-# Register your models here.
+admin.site.register(PregnancyProfile)
+admin.site.register(HealthLog)

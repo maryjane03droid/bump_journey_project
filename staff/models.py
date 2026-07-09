@@ -34,7 +34,6 @@ class Appointment(models.Model):
     reason = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=35, choices=STATUS_CHOICES, default='REQUESTED')
 
-    # Case locking
     is_locked = models.BooleanField(default=False)
     locked_by = models.ForeignKey(
         User,
@@ -44,7 +43,6 @@ class Appointment(models.Model):
         related_name='locked_appointments'
     )
 
-    # Referral fields
     referred_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -69,8 +67,6 @@ class Appointment(models.Model):
     def __str__(self):
         doctor_name = self.doctor.username if self.doctor else "Unassigned"
         return f"{self.patient.username} - {self.status} ({doctor_name})"
-
-
 class StaffNote(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='staff_notes')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='authored_notes', null=True)

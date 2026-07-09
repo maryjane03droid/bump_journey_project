@@ -31,8 +31,6 @@ class SuccessMessageMixin:
         return response
 
 
-# ─── Auth ─────────────────────────────────────────────
-
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -57,8 +55,6 @@ class CustomTokenRefreshView(TokenRefreshView):
         return response
 
 
-# ─── Registration ─────────────────────────────────────
-
 class PatientRegisterView(SuccessMessageMixin, generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
@@ -79,12 +75,8 @@ class StaffRegisterView(SuccessMessageMixin, generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         return self._wrap(response, self.create_success_message)
-
-
-# ─── Admin: User Management ──────────────────────────
-
+    
 class AdminUserListView(generics.ListAPIView):
-    """Admin sees all users, filterable by role via ?role=DOCTOR"""
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
@@ -104,7 +96,6 @@ class AdminUserListView(generics.ListAPIView):
 
 
 class AdminApproveStaffView(generics.UpdateAPIView):
-    """Admin approves or rejects staff by setting is_approved."""
     queryset = User.objects.all()
     serializer_class = AdminApproveSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
@@ -119,10 +110,7 @@ class AdminApproveStaffView(generics.UpdateAPIView):
         )
 
 
-# ─── Career Applications ─────────────────────────────
-
 class CareerApplicationCreateView(generics.CreateAPIView):
-    """Public: anyone can submit a career application."""
     queryset = CareerApplication.objects.all()
     serializer_class = CareerApplicationSerializer
     permission_classes = [AllowAny]
@@ -135,10 +123,7 @@ class CareerApplicationCreateView(generics.CreateAPIView):
                 status=status.HTTP_201_CREATED
             )
         return response
-
-
 class CareerApplicationListView(generics.ListAPIView):
-    """Admin views all career applications, filterable by ?status=PENDING"""
     serializer_class = CareerApplicationSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
@@ -157,10 +142,7 @@ class CareerApplicationListView(generics.ListAPIView):
         )
 
 
-# ─── Contact Messages ────────────────────────────────
-
 class ContactMessageCreateView(generics.CreateAPIView):
-    """Public: anyone can send a message to the admin."""
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
     permission_classes = [AllowAny]
@@ -176,7 +158,6 @@ class ContactMessageCreateView(generics.CreateAPIView):
 
 
 class ContactMessageListView(generics.ListAPIView):
-    """Admin views all contact messages."""
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
@@ -186,4 +167,4 @@ class ContactMessageListView(generics.ListAPIView):
         return Response(
             {'message': 'Messages retrieved successfully', 'data': response.data},
             status=status.HTTP_200_OK
-        )
+        )   

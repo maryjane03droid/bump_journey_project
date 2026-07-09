@@ -12,13 +12,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        # Block unapproved staff from logging in
         if self.user.role in STAFF_ROLES and not self.user.is_approved:
             raise serializers.ValidationError(
                 'Your registration is pending admin approval. Please wait up to 24 hours.'
             )
 
-        # Include useful info in login response
         data['user_id'] = str(self.user.id)
         data['username'] = self.user.username
         data['email'] = self.user.email
@@ -28,7 +26,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class PatientRegisterSerializer(serializers.ModelSerializer):
-    """Registration for patients (clients)."""
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
     class Meta:
@@ -48,7 +45,6 @@ class PatientRegisterSerializer(serializers.ModelSerializer):
 
 
 class StaffRegisterSerializer(serializers.ModelSerializer):
-    """Registration for staff after career application is approved."""
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     license_number = serializers.CharField(
         required=True,
@@ -87,7 +83,6 @@ class StaffRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """For admin views: listing and managing users."""
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'is_approved', 'license_number', 'date_joined']
@@ -95,7 +90,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AdminApproveSerializer(serializers.ModelSerializer):
-    """Admin approves or rejects staff registration."""
     class Meta:
         model = User
         fields = ['id', 'username', 'role', 'is_approved']

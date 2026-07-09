@@ -55,19 +55,12 @@ class AppointmentViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-
-        # Patients see their own appointments
         if user.role == 'PATIENT':
             return Appointment.objects.filter(patient=user)
-
-        # Specialist staff only see referrals sent to them
         if user.is_specialist_staff:
             return Appointment.objects.filter(referred_to=user)
-
-        # Primary staff and admin see all
         if user.is_primary_staff or user.role == 'ADMIN':
             return Appointment.objects.all()
-
         return Appointment.objects.none()
 
     def perform_create(self, serializer):
@@ -75,26 +68,19 @@ class AppointmentViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
         if user.role == 'PATIENT':
             serializer.save(patient=user, status='REQUESTED')
             AuditTrail.objects.create(
-                user=user,
-                user_role=user.role,
-                action='APPOINTMENT_REQUESTED',
-                patient=user,
+                user=user, user_role=user.role,
+                action='APPOINTMENT_REQUESTED', patient=user,
                 description=f'Patient requested appointment: {serializer.instance.reason}'
             )
         else:
             patient_id = self.request.data.get('patient')
             serializer.save(doctor=user, patient_id=patient_id, status='SCHEDULED')
             AuditTrail.objects.create(
-                user=user,
-                user_role=user.role,
-                action='APPOINTMENT_SCHEDULED',
-                patient_id=patient_id,
+                user=user, user_role=user.role,
+                action='APPOINTMENT_SCHEDULED', patient_id=patient_id,
                 description='Staff scheduled appointment for patient'
             )
-
-
 class ReferAppointmentView(APIView):
-    """Staff refers an appointment to another staff member."""
     permission_classes = [IsAuthenticated, IsAnyStaff]
 
     def post(self, request, pk):
@@ -112,13 +98,11 @@ class ReferAppointmentView(APIView):
         except User.DoesNotExist:
             return Response({'message': 'Staff member not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Set referral
         appointment.referred_by = request.user
         appointment.referred_to = referred_to_user
         appointment.is_locked = False
         appointment.locked_by = None
 
-        # Set appropriate status based on referred staff's role
         role_status_map = {
             'DOCTOR': 'NEEDS_DOCTOR_ATTENTION',
             'PEDIATRICIAN': 'NEEDS_DOCTOR_ATTENTION',
@@ -132,21 +116,14 @@ class ReferAppointmentView(APIView):
         appointment.save()
 
         AuditTrail.objects.create(
-            user=request.user,
-            user_role=request.user.role,
-            action='CASE_REFERRED',
-            patient=appointment.patient,
+            user=request.user, user_role=request.user.role,
+            action='CASE_REFERRED', patient=appointment.patient,
             description=f'Referred to {referred_to_user.username} ({referred_to_user.get_role_display()})'
         )
-
-        return Response(
-            {'message': f'Appointment referred to {referred_to_user.username} successfully.'},
-            status=status.HTTP_200_OK
-        )
+        return Response({'message': f'Appointment referred to {referred_to_user.username} successfully.'}, status=status.HTTP_200_OK)
 
 
 class LockAppointmentView(APIView):
-    """Staff locks a case so no other staff can access it."""
     permission_classes = [IsAuthenticated, IsAnyStaff]
 
     def post(self, request, pk):
@@ -155,14 +132,12 @@ class LockAppointmentView(APIView):
         except Appointment.DoesNotExist:
             return Response({'message': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if already locked by another staff
         if appointment.is_locked and appointment.locked_by != request.user:
             return Response(
                 {'message': f'This patient has already been attended to by {appointment.locked_by.username}. No access.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Lock the case
         appointment.is_locked = True
         appointment.locked_by = request.user
         appointment.doctor = request.user
@@ -170,17 +145,11 @@ class LockAppointmentView(APIView):
         appointment.save()
 
         AuditTrail.objects.create(
-            user=request.user,
-            user_role=request.user.role,
-            action='CASE_LOCKED',
-            patient=appointment.patient,
+            user=request.user, user_role=request.user.role,
+            action='CASE_LOCKED', patient=appointment.patient,
             description=f'Case locked by {request.user.username}'
         )
-
-        return Response(
-            {'message': 'Case locked successfully. You are now handling this patient.'},
-            status=status.HTTP_200_OK
-        )
+        return Response({'message': 'Case locked successfully. You are now handling this patient.'}, status=status.HTTP_200_OK)
 
 
 class StaffNoteViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
@@ -194,16 +163,13 @@ class StaffNoteViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
         AuditTrail.objects.create(
-            user=self.request.user,
-            user_role=self.request.user.role,
-            action='NOTE_ADDED',
-            patient=serializer.instance.patient,
+            user=self.request.user, user_role=self.request.user.role,
+            action='NOTE_ADDED', patient=serializer.instance.patient,
             description=f'Staff note added by {self.request.user.username}'
         )
 
 
 class AuditTrailListView(generics.ListAPIView):
-    """Patients see their own audit trail. Staff/admin see all."""
     serializer_class = AuditTrailSerializer
     permission_classes = [IsAuthenticated]
 
@@ -215,14 +181,10 @@ class AuditTrailListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
-        return Response(
-            {'message': 'Audit trail retrieved successfully', 'data': response.data},
-            status=status.HTTP_200_OK
-        )
+        return Response({'message': 'Audit trail retrieved successfully', 'data': response.data}, status=status.HTTP_200_OK)
 
 
 class StaffPatientListView(generics.ListAPIView):
-    """Staff sees all patients with their IDs for dropdown selection."""
     permission_classes = [IsAuthenticated, IsAnyStaff]
 
     def get_queryset(self):
@@ -230,7 +192,4 @@ class StaffPatientListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         patients = self.get_queryset().values('id', 'username', 'email')
-        return Response(
-            {'message': 'Patients retrieved successfully', 'data': list(patients)},
-            status=status.HTTP_200_OK
-        )
+        return Response({'message': 'Patients retrieved successfully', 'data': list(patients)}, status=status.HTTP_200_OK)
