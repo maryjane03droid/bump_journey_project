@@ -19,14 +19,9 @@ class User(AbstractUser):
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='PATIENT')
-
-    # Staff approval workflow: staff cannot login until admin approves
     is_approved = models.BooleanField(default=False)
-
-    # License number for staff (10 digits, numbers only)
     license_number = models.CharField(max_length=10, blank=True, null=True)
 
-    # Link patients to their primary clinician
     assigned_staff = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -35,21 +30,61 @@ class User(AbstractUser):
         related_name='patients'
     )
 
-    # Helper properties
     @property
     def is_primary_staff(self):
-        """Doctors, Pediatricians, and Nurses can attend patients directly."""
         return self.role in ['DOCTOR', 'PEDIATRICIAN', 'NURSE']
 
     @property
     def is_specialist_staff(self):
-        """Midwives, Nutritionists, Lab Techs, Therapists only receive referrals."""
         return self.role in ['MIDWIFE', 'NUTRITIONIST', 'LAB_TECHNICIAN', 'THERAPIST']
 
     @property
     def is_any_staff(self):
-        """Any staff role (primary or specialist)."""
         return self.is_primary_staff or self.is_specialist_staff
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
+
+
+class CareerApplication(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    role_applied = models.CharField(max_length=20, choices=User.ROLE_CHOICES)
+    qualification = models.CharField(max_length=255)
+    years_of_experience = models.IntegerField()
+    license_number = models.CharField(max_length=10)
+    message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.full_name} - {self.role_applied} ({self.status})"
+
+
+class ContactMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    admin_response = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
