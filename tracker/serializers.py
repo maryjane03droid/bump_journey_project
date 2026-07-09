@@ -7,7 +7,7 @@ User = get_user_model()
 
 class PregnancyProfileSerializer(serializers.ModelSerializer):
     patient_username = serializers.ReadOnlyField(source='patient.username')
-    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     class Meta:
         model = PregnancyProfile
@@ -17,7 +17,7 @@ class PregnancyProfileSerializer(serializers.ModelSerializer):
 
 class HealthLogSerializer(serializers.ModelSerializer):
     patient_username = serializers.ReadOnlyField(source='patient.username')
-    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     class Meta:
         model = HealthLog

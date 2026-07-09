@@ -55,6 +55,14 @@ class PregnancyProfileViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet)
             return PregnancyProfile.objects.all()
         return PregnancyProfile.objects.filter(patient=user)
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role == 'PATIENT':
+            serializer.save(patient=user)
+        else:
+            patient_id = self.request.data.get('patient')
+            serializer.save(patient_id=patient_id)
+
 
 class HealthLogViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
     serializer_class = HealthLogSerializer

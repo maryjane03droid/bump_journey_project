@@ -14,8 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
 class AppointmentSerializer(serializers.ModelSerializer):
     doctor_username = serializers.ReadOnlyField(source='doctor.username')
     patient_username = serializers.ReadOnlyField(source='patient.username')
-    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     doctor = serializers.PrimaryKeyRelatedField(read_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Appointment
@@ -25,6 +26,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'doctor': {'read_only': True},
+            'date': {'required': False},
+            'time': {'required': False},
+            'reason': {'required': False},
         }
 
 class StaffNoteSerializer(serializers.ModelSerializer):

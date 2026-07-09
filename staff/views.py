@@ -49,14 +49,17 @@ class AppointmentViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
+    create_success_message = 'Appointment requested successfully. Awaiting staff confirmation.'
 
     def perform_create(self, serializer):
         user = self.request.user
         if user.role == 'PATIENT':
-            serializer.save(patient=user)
+            # Patient is requesting an appointment—always set status to REQUESTED
+            serializer.save(patient=user, status='REQUESTED')
         else:
+            # Staff is scheduling an appointment directly
             patient_id = self.request.data.get('patient')
-            serializer.save(doctor=user, patient_id=patient_id)
+            serializer.save(doctor=user, patient_id=patient_id, status='SCHEDULED')
 
 
 class StaffNoteViewSet(SuccessMessageViewSetMixin, viewsets.ModelViewSet):
