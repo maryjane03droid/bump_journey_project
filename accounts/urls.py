@@ -8,6 +8,8 @@ from .views import (
     AdminApproveStaffView,
     CareerApplicationCreateView,
     CareerApplicationListView,
+    CareerApplicationUpdateView,
+    CareerApplicationStatusView,
     ContactMessageCreateView,
     ContactMessageListView,
 )
@@ -25,7 +27,9 @@ urlpatterns = [
 
     # Career applications
     path('careers/apply/', CareerApplicationCreateView.as_view(), name='career_apply'),
+    path('careers/status/', CareerApplicationStatusView.as_view(), name='career_status'),
     path('admin/careers/', CareerApplicationListView.as_view(), name='career_list'),
+    path('admin/careers/<str:pk>/update/', CareerApplicationUpdateView.as_view(), name='career_update'),
 
     # Contact messages
     path('contact/', ContactMessageCreateView.as_view(), name='contact_create'),

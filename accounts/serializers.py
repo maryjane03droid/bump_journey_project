@@ -119,6 +119,28 @@ class CareerApplicationSerializer(serializers.ModelSerializer):
         return value
 
 
+class CareerApplicationStatusUpdateSerializer(serializers.ModelSerializer):
+    """Admin-only. Writes ONLY the status field.
+
+    Kept separate from CareerApplicationSerializer (used by the public
+    /careers/apply/ endpoint) so an applicant can never set their own
+    status by including a "status" key in their application payload.
+    """
+
+    class Meta:
+        model = CareerApplication
+        fields = ['id', 'status']
+        read_only_fields = ['id']
+
+    def validate_status(self, value):
+        valid_statuses = ['PENDING', 'APPROVED', 'REJECTED']
+        if value not in valid_statuses:
+            raise serializers.ValidationError(
+                f'Status must be one of: {", ".join(valid_statuses)}'
+            )
+        return value
+
+
 class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage

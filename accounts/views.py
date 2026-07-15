@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import (
@@ -10,6 +11,7 @@ from .serializers import (
     UserSerializer,
     AdminApproveSerializer,
     CareerApplicationSerializer,
+    CareerApplicationStatusUpdateSerializer,
     ContactMessageSerializer,
 )
 from .models import CareerApplication, ContactMessage
@@ -142,6 +144,44 @@ class CareerApplicationListView(generics.ListAPIView):
         )
 
 
+class CareerApplicationUpdateView(generics.UpdateAPIView):
+    """Admin-only. PATCH /accounts/admin/careers/<id>/update/
+    Body: { "status": "APPROVED" | "REJECTED" | "PENDING" }
+    This is the endpoint the Approve/Reject buttons were missing."""
+    queryset = CareerApplication.objects.all()
+    serializer_class = CareerApplicationStatusUpdateSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        app = self.get_object()
+        return Response(
+            {'message': f'Application {app.status.lower()}.', 'data': response.data},
+            status=status.HTTP_200_OK
+        )
+
+
+class CareerApplicationStatusView(generics.RetrieveAPIView):
+    """Public. GET /accounts/careers/status/?email=someone@example.com
+    Used by the 'Check Application Status' page. Returns the most
+    recently submitted application for that email."""
+    serializer_class = CareerApplicationSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        email = self.request.query_params.get('email')
+        if not email:
+            raise NotFound('Email is required.')
+        application = (
+            CareerApplication.objects.filter(email__iexact=email)
+            .order_by('-created_at')
+            .first()
+        )
+        if not application:
+            raise NotFound('No application found for this email.')
+        return application
+
+
 class ContactMessageCreateView(generics.CreateAPIView):
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
@@ -167,4 +207,4 @@ class ContactMessageListView(generics.ListAPIView):
         return Response(
             {'message': 'Messages retrieved successfully', 'data': response.data},
             status=status.HTTP_200_OK
-        )   
+        )

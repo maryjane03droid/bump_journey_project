@@ -19,7 +19,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     referred_to_username = serializers.ReadOnlyField(source='referred_to.username')
     patient = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     doctor = serializers.PrimaryKeyRelatedField(read_only=True)
-    status = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=False)
 
     class Meta:
         model = Appointment
